@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gamestore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Password123!
+      POSTGRES_DB: gamestoredb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gamestoredb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: gamestore-sonarqube
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonardb
+      SONAR_JDBC_USERNAME: postgres
+      SONAR_JDBC_PASSWORD: Password123!
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
+volumes:
+  postgres_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

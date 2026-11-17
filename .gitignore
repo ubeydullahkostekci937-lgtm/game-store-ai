@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.vscode/
+node_modules/
+.next/
+out/
+*.user
+*.suo
+.env
+.env.local
+.sonarqube/
+TestResults/
